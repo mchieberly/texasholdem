@@ -5,9 +5,10 @@ Contains the Player class
 class Player:
     """A player of the poker game."""
     
-    def __init__(self, chips):
+    def __init__(self, player_number, chips):
         """Initializes a player object."""
         self.hand = []
+        self.num = player_number
         self.chips = chips
         self.current_bet = 0
     
@@ -37,5 +38,9 @@ class Player:
 
     def __str__(self):
         """String representation of the player's hand and chips."""
-        hand_description = ', '.join(str(card) for card in self.hand)
-        return f"Player with hand: {hand_description} and chips: {self.chips}"
+        temp_hand = list(self.hand)
+        if len(temp_hand) == 2:
+            if temp_hand[0].rank < temp_hand[1].rank:
+                temp_hand[0], temp_hand[1] = temp_hand[1], temp_hand[0]
+        hand_description = ', '.join(str(card) for card in temp_hand)
+        return f"Player {self.num} with hand: {hand_description}; and chips: {self.chips}"

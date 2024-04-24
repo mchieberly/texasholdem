@@ -1,10 +1,9 @@
 """
 Contains the Card class
 
-Adapted from Cody Watson's CSCI-111 Lab 12 <cwatson@wlu.edu>
 """
 
-class Card(object):
+class Card:
     """ A card object with a suit and rank."""
 
     def __init__(self, rank, suit):
@@ -14,14 +13,14 @@ class Card(object):
         
     def __str__(self):
         """Returns the string representation of a card."""
-        if self.rank == 1:
-            rank = 'Ace'
-        elif self.rank == 11:
+        if self.rank == 11:
             rank = 'Jack'
         elif self.rank == 12:
             rank = 'Queen'
         elif self.rank == 13:
-            rank = 'King'
+            rank = 'King'        
+        elif self.rank == 14:
+            rank = 'Ace'
         else:
             rank = self.rank
         return str(rank) + ' of ' + self.suit

@@ -1,7 +1,6 @@
 """
 Contains the Deck class
 
-Adapted from Cody Watson's CSCI-111 Lab 12 <cwatson@wlu.edu>
 """
 
 import random
@@ -9,7 +8,7 @@ import random
 from src.constants import RANKS, SUITS
 from src.game.resources.card import Card
 
-class Deck(object):
+class Deck:
     """ A deck containing 52 cards."""
 
     def __init__(self):
