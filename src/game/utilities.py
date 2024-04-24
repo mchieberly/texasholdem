@@ -11,7 +11,7 @@ def print_hand_info(rank, hand):
     article = "an" if converted_hand[0] == "Ace" else "an"
     
     if rank == 10:
-        return "{article} Royal Flush!"
+        return f"{article} Royal Flush!"
     elif rank == 9:
         return f"{article} {converted_hand[0]} High Straight Flush"
     elif rank == 8:
