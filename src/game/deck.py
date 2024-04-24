@@ -6,7 +6,7 @@ Contains the Deck class
 import random
 
 from src.constants import RANKS, SUITS
-from src.game.resources.card import Card
+from src.game.card import Card
 
 class Deck:
     """ A deck containing 52 cards."""

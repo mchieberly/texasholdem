@@ -1,11 +1,12 @@
-from src.game.resources.deck import Deck
-from src.game.resources.player import Player
+from src.game.deck import Deck
+from src.game.player import Player
 from src.game.utilities import print_hand_info
 
 from collections import Counter
+import random
 
 class Game:
-    """Game class for a poker game."""
+    """Game class for managing poker rounds."""
     
     def __init__(self, players, small_blind_amount=10, big_blind_amount=20, ante_amount=0):
         """Initializes a Game object."""
@@ -13,41 +14,123 @@ class Game:
         self.players = players
         self.community_cards = []
         self.pot = 0
+        self.side_pots = []
+        self.current_highest_bet = 0
         self.small_blind_amount = small_blind_amount
         self.big_blind_amount = big_blind_amount
         self.ante_amount = ante_amount
         self.small_blind_index = 0
         
+    def handle_bets(self, player, amount):
+        """Handles bet logic including side pot creation for all-in situations."""
+        if amount >= player.chips:
+            self.create_side_pot(player, amount)
+        else:
+            self.pot += player.bet(amount)
+            self.current_highest_bet = max(self.current_highest_bet, amount)
+    
+    def create_side_pot(self, player, amount):
+        """Create or update side pots when a player goes all-in."""
+        all_in_amount = player.all_in()
+        self.pot += all_in_amount  # Add the all-in amount to the main pot first
+
+        for sp in self.side_pots:
+            if sp['max_contribution'] > player.chips:
+                sp['amount'] += player.chips
+            else:
+                sp['amount'] += sp['max_contribution']
+
+        # Check if a new side pot needs to be created
+        existing_contributions = sum(sp['max_contribution'] for sp in self.side_pots if player.chips >= sp['max_contribution'])
+        if player.chips > existing_contributions:
+            new_side_pot = {
+                'amount': player.chips - existing_contributions,
+                'players': [p for p in self.players if p.chips > existing_contributions and p.is_active],
+                'max_contribution': player.chips
+            }
+            self.side_pots.append(new_side_pot)
+
+    def evaluate_winner(self):
+        # Evaluation logic should now handle side pots
+        base_pot_winner = None  # This will be your normal pot evaluation logic
+        print(f"The winner for the main pot is {base_pot_winner}")
+
+        for sp in self.side_pots:
+            side_pot_winner = None  # This will involve similar logic to your base pot but restricted to the players in 'sp['players']'
+            print(f"The winner for the side pot of {sp['amount']} is {side_pot_winner}")
+    
     def post_blinds_and_antes(self):
-        """Post antes and rotate blinds among players."""
-        # Post antes
-        if self.ante_amount > 0:
-            for player in self.players:
-                self.pot += player.bet(self.ante_amount)
-        
-        # Rotate small blind
+        """Post antes if any and handle blinds rotation among players."""
+        ante_amount = 10
+        small_blind_amount = 20
+        big_blind_amount = 40
+
+        # Collect antes if applicable
+        for player in self.players:
+            if player.chips > ante_amount:
+                # If antes are treated as separate from the normal betting cycle, we might not need current_highest_bet
+                self.pot += player.bet(ante_amount, 0)  # Assuming ante doesn't require matching previous bets
+            else:
+                self.pot += player.all_in()
+
+        # Handle blinds
         num_players = len(self.players)
-        small_blind_player = self.players[self.small_blind_index]
+        small_blind_player = self.players[self.small_blind_index % num_players]
         big_blind_player = self.players[(self.small_blind_index + 1) % num_players]
 
-        # Post small and big blinds
-        self.pot += small_blind_player.bet(self.small_blind_amount)
-        self.pot += big_blind_player.bet(self.big_blind_amount)
+        # Players post small and big blinds
+        # Since blinds start a new betting cycle, small blind doesn't need a higher current_highest_bet.
+        self.pot += small_blind_player.bet(small_blind_amount, 0)
+        self.current_highest_bet = small_blind_amount  # Update after small blind is posted
+        self.pot += big_blind_player.bet(big_blind_amount, self.current_highest_bet)
+        self.current_highest_bet = big_blind_amount  # Update after big blind
 
         # Rotate the small blind index for the next game
         self.small_blind_index = (self.small_blind_index + 1) % num_players
-    
-    def deal_hole_cards(self):
+            
+    def play_round(self):
+        # Clear previous round details
+        self.deck.shuffle()
+        self.deal_cards()
+        self.betting_round()
+        # Additional round details like dealing community cards would go here
+
+    def deal_cards(self):
         """Deals two cards to each player."""
         for player in self.players:
             player.add_card(self.deck.deal())
             player.add_card(self.deck.deal())
-    
+
     def betting_round(self):
-        """Conducts a betting round."""
+        """Handles a round of betting among players."""
         for player in self.players:
-            bet = player.bet(10)  # Simplified betting logic
-            self.pot += bet
+            if player.is_active:
+                print(f"Current highest bet: {self.current_highest_bet}")
+                decision = input(f"Player {player.num}, choose 'fold', 'check', 'call', 'bet', or 'all-in': ").strip().lower()
+                if decision == 'fold':
+                    player.fold()
+                elif decision == 'check':
+                    if self.current_highest_bet > 0 and player.current_bet < self.current_highest_bet:
+                        print("Cannot check, there is an active bet.")
+                        continue  # Ask for a new decision
+                    player.check()
+                elif decision == 'call':
+                    if self.current_highest_bet == 0:
+                        print("Nothing to call; you might want to check.")
+                        continue  # Ask for a new decision
+                    self.pot += player.call(self.current_highest_bet)
+                elif decision == 'bet':
+                    while True:
+                        amount = int(input("Enter bet amount: "))
+                        if amount < 2 * self.current_highest_bet:
+                            print(f"Bet must be at least twice the current highest bet, which is {2 * self.current_highest_bet}.")
+                            continue
+                        self.pot += player.bet(amount)
+                        self.current_highest_bet = max(self.current_highest_bet, amount)
+                        break
+                elif decision == 'all-in':
+                    self.pot += player.all_in()
+                print(f"Player {player.num} now has {player.chips} chips.")
     
     def deal_flop(self):
         """Deals the flop after burning a card."""
@@ -189,7 +272,7 @@ class Game:
         self.deck.shuffle()
         self.community_cards = []
         self.post_blinds_and_antes()
-        self.deal_hole_cards()
+        self.deal_cards()
         self.betting_round()
         self.deal_flop()
         self.betting_round()
@@ -199,11 +282,3 @@ class Game:
         self.betting_round()
         self.evaluate_winner()
         self.pot = 0  # Reset the pot after the round
-        
-if __name__ == "__main__":
-    players = [Player(1, 100), Player(2, 100), Player(3, 100)]
-    game = Game(players)
-    game.play_round()
-    print(game.show_community_cards())
-    for player in game.players:
-        print(player)
