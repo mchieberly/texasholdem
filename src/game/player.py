@@ -15,13 +15,15 @@ class Player:
         self.chips = chips
         self.current_bet = 0
         self.pos = pos
+        self.screen = screen
         self.is_active = True
         
-    def draw(self, screen):
+    def draw(self, card_images):
+        x, y = self.pos
         for idx, card in enumerate(self.hand):
-            card_pos = (self.pos[0] + idx * (CARD_WIDTH + 5), self.pos[1])
-            utilities.draw_card(screen, card.get_key(), card_pos)
-
+            card_image = card_images[card.get_key()]
+            self.screen.blit(card_image, (x + idx * (CARD_WIDTH + 5), y))
+            
     def bet(self, amount, current_highest_bet):
         """Places a bet or raise, considering the minimum required bet."""
         if self.chips <= amount:

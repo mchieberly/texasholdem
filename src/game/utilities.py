@@ -43,7 +43,12 @@ def draw_text(screen, text, position, size=20, color=(255, 255, 255)):
     screen.blit(text_surface, position)
 
 def draw_button(screen, text, position, width, height):
-    button_rect = pygame.Rect(position[0], position[1], width, height)
-    pygame.draw.rect(screen, (0, 0, 0), button_rect)
-    draw_text(screen, text, (position[0] + 10, position[1] + 10))
-    return button_rect
+    font = pygame.font.Font(None, 36)
+    button_color = (0, 0, 0)  # Example color
+    text_color = (255, 255, 255)
+    rect = pygame.Rect(position[0], position[1], width, height)
+    pygame.draw.rect(screen, button_color, rect)
+    text_surf = font.render(text, True, text_color)
+    text_rect = text_surf.get_rect(center=rect.center)
+    screen.blit(text_surf, text_rect)
+    return rect  # Returning the rectangle can help in detecting clicks later

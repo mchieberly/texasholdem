@@ -100,15 +100,22 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            # Properly handle text input for the bet amount
             bet_input_box.handle_event(event)
 
-        if pygame.mouse.get_pressed()[0]:  # If left mouse button is pressed
-            handle_buttons()
+            # Correctly detect mouse clicks on buttons
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # 1 is the left mouse button
+                handle_buttons()
 
-        screen.blit(table, (0, 0))
+        screen.blit(table, (0, 0))  # Draw the background table
         for player in players:
-            player.draw(screen)
-        bet_input_box.draw(screen)
+            player.draw(card_images)  # Draw each player's cards and information
+        bet_input_box.draw(screen)  # Draw the betting input box
+        utilities.draw_button(screen, "Fold", (850, 700), 100, 50)  # Redraw buttons
+        utilities.draw_button(screen, "Check", (750, 700), 100, 50)
+        utilities.draw_button(screen, "Call", (650, 700), 100, 50)
+        utilities.draw_button(screen, "Bet", (550, 700), 100, 50)
         pygame.display.flip()
         clock.tick(constants.FPS)
 
