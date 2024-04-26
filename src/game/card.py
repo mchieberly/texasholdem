@@ -3,11 +3,6 @@ Contains the Card class
 
 """
 
-from src.constants import CARD_IMAGES_DIR
-from src.game.utilities import get_image_file_name
-
-from pygame.image import load
-
 class Card:
     """ A card object with a suit and rank."""
 
@@ -30,7 +25,3 @@ class Card:
         else:
             rank = self.rank
         return str(rank) + ' of ' + self.suit
-
-    def load_image(self):
-        filename = CARD_IMAGES_DIR + get_image_file_name(self)
-        return load(filename).convert_alpha()

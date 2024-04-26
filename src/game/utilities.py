@@ -31,27 +31,3 @@ def print_hand_info(rank, hand):
     elif rank == 1:
         return f"{article} {converted_hand[0]} High"
     
-def get_image_file_name(card):
-    if card.rank == 10:
-        rank = 'T'
-    elif card.rank == 11:
-        rank = 'J'
-    elif card.rank == 12:
-        rank = 'Q'
-    elif card.rank == 13:
-        rank = 'K'        
-    elif card.rank == 14:
-        rank = 'A'
-    else:
-        rank = card.rank 
-    
-    if card.suit == 'Spades':
-        suite = 's'
-    elif card.suit == 'Diamonds':
-        suite = 'd'
-    elif card.suit == 'Hearts':
-        suite = 'h'
-    else:
-        suite = 'c'
-        
-    return rank + suite
