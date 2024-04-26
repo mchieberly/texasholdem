@@ -10,7 +10,9 @@ class Card:
         """Creates a card with the given rank and suit."""
         self.rank = rank
         self.suit = suit
-        self.image = self.load_image()
+        
+    def get_key(self):
+        return  f"{self.rank}{self.suit}"
                 
     def __str__(self):
         """Returns the string representation of a card."""

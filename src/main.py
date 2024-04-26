@@ -4,6 +4,11 @@ Main file for running poker game GUI
 """
 
 import src.constants as constants
+from src.game.deck import Deck
+from src.game.game import Game
+from src.game.inputbox import InputBox
+from src.game.player import Player
+import src.game.utilities as utilities
 
 import os
 import pygame
@@ -39,51 +44,73 @@ def load_background():
 card_images = load_card_images()
 table = load_background()
 
-def draw_card(card_key, position):
-    card_image = card_images[card_key]
-    screen.blit(card_image, position)
+players = [
+    Player(1, 1000, (50, 650), screen),
+    Player(2, 1000, (50, 50), screen),
+    # Add more players as needed
+]
+game = Game(players)
+current_player_index = 0
 
-def draw_text(text, position, size=20, color=(255, 255, 255)):
-    font = pygame.font.Font(None, size)
-    text_surface = font.render(text, True, color)
-    screen.blit(text_surface, position)
+button_fold = utilities.draw_button(screen, "Fold", (850, 700), 100, 50)
+button_check = utilities.draw_button(screen, "Check", (750, 700), 100, 50)
+button_call = utilities.draw_button(screen, "Call", (650, 700), 100, 50)
+button_bet = utilities.draw_button(screen, "Bet", (550, 700), 100, 50)
+bet_input_box = InputBox(400, 700, 140, 32)
 
-def draw_button(text, position, width, height):
-    button_rect = pygame.Rect(position[0], position[1], width, height)
-    pygame.draw.rect(screen, (0, 0, 0), button_rect)
-    draw_text(text, (position[0] + 10, position[1] + 10))
-    return button_rect
-
-def game_loop():    
-    button_fold = draw_button("Fold", (850, 700), 100, 50)
-    button_check = draw_button("Check", (750, 700), 100, 50)
-    button_call = draw_button("Call", (650, 700), 100, 50)
-    button_bet = draw_button("Bet", (550, 700), 100, 50)
+def handle_buttons():
+    """Handle button presses and update game state accordingly."""
+    global current_player_index
+    current_player = players[current_player_index]
+    mouse_pos = pygame.mouse.get_pos()
     
+    if button_fold.collidepoint(mouse_pos):
+        current_player.fold()
+        next_player()
+    elif button_check.collidepoint(mouse_pos):
+        if game.current_highest_bet == 0 or current_player.current_bet == game.current_highest_bet:
+            current_player.check()  # Can only check if no bet has been placed
+            next_player()
+        else:
+            print("Cannot check, there is an active bet.")
+    elif button_call.collidepoint(mouse_pos):
+        if game.current_highest_bet > 0:
+            bet_amount = game.current_highest_bet - current_player.current_bet
+            current_player.bet(bet_amount)
+            next_player()
+    elif button_bet.collidepoint(mouse_pos):
+        bet_amount = int(bet_input_box.get_text())
+        if bet_amount >= 2 * game.current_highest_bet:
+            current_player.bet(bet_amount)
+            game.current_highest_bet = bet_amount
+            bet_input_box.clear_text()
+            next_player()
+
+def next_player():
+    """Move to the next player, handling game round transitions."""
+    global current_player_index
+    current_player_index = (current_player_index + 1) % len(players)
+    if current_player_index == 0:
+        game.play_round()
+        
+def game_loop():
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            bet_input_box.handle_event(event)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = event.pos
-                if button_fold.collidepoint(mouse_pos):
-                    print("Fold clicked")
-                elif button_check.collidepoint(mouse_pos):
-                    print("Check clicked")
-                elif button_call.collidepoint(mouse_pos):
-                    print("Call clicked")
-                elif button_bet.collidepoint(mouse_pos):
-                    print("Bet clicked")
+        if pygame.mouse.get_pressed()[0]:  # If left mouse button is pressed
+            handle_buttons()
 
-        screen.blit(table, (0, 0))  # Draw the table background
-
-        # Update the display
+        screen.blit(table, (0, 0))
+        for player in players:
+            player.draw(screen)
+        bet_input_box.draw(screen)
         pygame.display.flip()
         clock.tick(constants.FPS)
 
 if __name__ == "__main__":
     game_loop()
-    

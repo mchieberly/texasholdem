@@ -2,7 +2,6 @@ from src.game.deck import Deck
 from src.game.utilities import print_hand_info
 
 from collections import Counter
-import random
 
 class Game:
     """Game class for managing poker rounds."""

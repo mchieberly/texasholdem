@@ -4,6 +4,8 @@ Utility functions for poker game
 
 from src.constants import RANK_TO_FACE
 
+import pygame
+
 def print_hand_info(rank, hand):
     """Prints the info for a hand."""
     
@@ -31,3 +33,17 @@ def print_hand_info(rank, hand):
     elif rank == 1:
         return f"{article} {converted_hand[0]} High"
     
+def draw_card(screen, card_images, card_key, position):
+    card_image = card_images[card_key]
+    screen.blit(card_image, position)
+
+def draw_text(screen, text, position, size=20, color=(255, 255, 255)):
+    font = pygame.font.Font(None, size)
+    text_surface = font.render(text, True, color)
+    screen.blit(text_surface, position)
+
+def draw_button(screen, text, position, width, height):
+    button_rect = pygame.Rect(position[0], position[1], width, height)
+    pygame.draw.rect(screen, (0, 0, 0), button_rect)
+    draw_text(screen, text, (position[0] + 10, position[1] + 10))
+    return button_rect

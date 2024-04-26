@@ -2,16 +2,25 @@
 Contains the Player class
 """
 
+from src.constants import CARD_WIDTH
+import src.game.utilities as utilities
+
 class Player:
     """A player of the poker game."""
 
-    def __init__(self, player_number, chips):
+    def __init__(self, player_number, chips, pos, screen):
         """Initializes a player object."""
         self.hand = []
         self.num = player_number
         self.chips = chips
         self.current_bet = 0
+        self.pos = pos
         self.is_active = True
+        
+    def draw(self, screen):
+        for idx, card in enumerate(self.hand):
+            card_pos = (self.pos[0] + idx * (CARD_WIDTH + 5), self.pos[1])
+            utilities.draw_card(screen, card.get_key(), card_pos)
 
     def bet(self, amount, current_highest_bet):
         """Places a bet or raise, considering the minimum required bet."""
