@@ -8,7 +8,7 @@ def print_hand_info(rank, hand):
     """Prints the info for a hand."""
     
     converted_hand = [RANK_TO_FACE.get(r, str(r)) for r in hand]
-    article = "an" if converted_hand[0] == "Ace" else "an"
+    article = "an" if converted_hand[0] == "Ace" else "a"
     
     if rank == 10:
         return "{article} Royal Flush!"
