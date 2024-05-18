@@ -77,17 +77,20 @@ class Game:
         if len(potential_winners) == 1:
             winner = potential_winners[0]
             hand_info = print_hand_info(highest_score[0], highest_score[1])
+            winner.chips += self.pot
             print(f"The winner is {winner} with {hand_info}.")
         else:
             # Check for exact ties, including all kickers
             best_kickers = sorted(hand_scores.items(), key=lambda x: (x[1][0], x[1][1]), reverse=True)
             winning_kickers = best_kickers[0][1][1]
-            top_winners = [player for player, score in hand_scores.items() if score[1] == winning_kickers]
+            top_winners = [player for player, score in hand_scores.items() if score == best_kickers[0][1]]
 
             if len(top_winners) == 1:
                 winner = top_winners[0]
-                kicker_that_decided = next((kicker for kicker in winning_kickers if kicker not in (score[1] for player, score in hand_scores.items() if player != winner)), None)
-                hand_info = print_hand_info(highest_score[0][0], highest_score[1])
+                # Determine the kicker that decided the winner
+                opponent_scores = [score[1] for player, score in hand_scores.items() if player != winner]
+                kicker_that_decided = next((kicker for kicker in winning_kickers if all(kicker > opp_kicker for opp_kicker in opponent_scores)), None)
+                hand_info = print_hand_info(highest_score[0], highest_score[1])
                 print(f"The winner is {winner} with {hand_info} and a {kicker_that_decided} kicker.")
             else:
                 print("It's a tie between the following players:")
@@ -186,8 +189,8 @@ class Game:
 
     def play_round(self):
         """Plays a round of poker."""
-        self.deck.shuffle()
         self.community_cards = []
+        self.deck.shuffle()
         self.post_blinds_and_antes()
         self.deal_hole_cards()
         self.betting_round()
@@ -198,12 +201,36 @@ class Game:
         self.deal_turn_or_river()
         self.betting_round()
         self.evaluate_winner()
+        for player in self.players:
+            print(player)
+            player.fold()
+        self.deck.reset()
         self.pot = 0  # Reset the pot after the round
         
 if __name__ == "__main__":
-    players = [Player(1, 100), Player(2, 100), Player(3, 100)]
+    # players = [Player(1, 1000), Player(2, 1000), Player(3, 1000)]
+    # game = Game(players)
+    # for _ in range(10):
+    #     game.play_round()
+    #     print(game.show_community_cards())
+
+    players = [Player(1, 1000), Player(2, 1000), Player(3, 1000)]
     game = Game(players)
-    game.play_round()
-    print(game.show_community_cards())
+    
+    game.community_cards = []
+    game.deck.shuffle()
+    game.post_blinds_and_antes()
+    game.deal_test_cards(("Queen", "Hearts"), (2, "Hearts"), ("Queen", "Clubs"))
+    game.betting_round()
+    game.deal_flop()
+    game.betting_round()
+    game.deal_turn_or_river()
+    game.betting_round()
+    game.deal_turn_or_river()
+    game.betting_round()
+    game.evaluate_winner()
     for player in game.players:
         print(player)
+        player.fold()
+    game.deck.reset()
+

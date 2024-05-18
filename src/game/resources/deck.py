@@ -5,7 +5,7 @@ Contains the Deck class
 
 import random
 
-from src.constants import RANKS, SUITS
+import src.constants as constants
 from src.game.resources.card import Card
 
 class Deck:
@@ -13,11 +13,7 @@ class Deck:
 
     def __init__(self):
         """Creates a full deck of cards."""
-        self.cards = []
-        for suit in SUITS:
-            for rank in RANKS:
-                c = Card(rank, suit)
-                self.cards.append(c)
+        self.reset()
 
     def __str__(self): 
         """Returns the string representation of a deck."""
@@ -29,6 +25,13 @@ class Deck:
     def __len__(self):
        """Returns the number of cards left in the deck."""
        return len(self.cards)
+   
+    def reset(self):
+        self.cards = []
+        for suit in constants.SUITS:
+            for rank in constants.RANKS:
+                c = Card(rank, suit)
+                self.cards.append(c)
 
     def shuffle(self):
         """Shuffles the cards."""
@@ -42,6 +45,15 @@ class Deck:
         else:
            return self.cards.pop(0)
 
+    def deal_specific_card(self, rank, suit):
+        """Removes and returns the specific card with the given rank and suit, or None if not found."""
+        rank = [rank if rank not in constants.HIGH_RANK_NUM else constants.HIGH_RANK_NUM[rank]]
+        for card in self.cards:
+            if card.rank == rank and card.suit == suit:
+                self.cards.remove(card)
+                return card
+        return None
+    
     def peek(self, index):
         """Prints attributes of indexed card or
         an error if the index is invalid."""

@@ -28,7 +28,12 @@ RANK_TO_FACE = {1: "Ace",
                 8: "Eight", 
                 9: "Nine", 
                 10: "Ten", 
-                11: 'Jack', 
-                12: 'Queen', 
-                13: 'King', 
-                14: 'Ace'}
+                11: "Jack", 
+                12: "Queen", 
+                13: "King", 
+                14: "Ace"}
+
+HIGH_RANK_NUM = {"Jack": 11,
+                 "Queen": 12,
+                 "King": 13,
+                 "Ace": 14}
