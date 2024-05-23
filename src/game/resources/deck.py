@@ -45,9 +45,10 @@ class Deck:
         else:
            return self.cards.pop(0)
 
-    def deal_specific_card(self, rank, suit):
+    def deal_specific_cards(self, hand):
         """Removes and returns the specific card with the given rank and suit, or None if not found."""
-        rank = [rank if rank not in constants.HIGH_RANK_NUM else constants.HIGH_RANK_NUM[rank]]
+        (rank, suit) = hand
+        rank = rank if rank not in constants.HIGH_RANK_NUM else constants.HIGH_RANK_NUM[rank]
         for card in self.cards:
             if card.rank == rank and card.suit == suit:
                 self.cards.remove(card)
